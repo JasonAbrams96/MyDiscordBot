@@ -1,6 +1,6 @@
 #ignores the file the have API keys or TOKENS
 token.txt
-gihpy_key.txt
+giphy_key.txt
 
 #ignore any directories that have images
 waluigi/
