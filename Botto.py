@@ -5,11 +5,15 @@
 #               Better in Python. If you download this project, you may use it. All I wish is to be
 #               mentioned as the person that made this. Basically give credit where it is due
 
+
 #imports
-import discord
+__name__ = "__main__"
+import json
 import os
 import random
+import sys
 
+import discord
 from discord import Game
 from discord.ext.commands import Bot
 
@@ -17,14 +21,42 @@ from discord.ext.commands import Bot
 #    For information about this project, the Information class will be
 #    responsible for it.
 #########################################
-from Python.Discord.info import Information as INFORMATION
+from my_info import Information
+from Internet_Calls import API_Calls
+
+INFO = Information()
+API_CALLS = API_Calls()
 
 File_Path = os.path.dirname(os.path.abspath(__file__))
 
 BOT_PREFIX = '!'
-TOKEN = INFORMATION.Get_Token()
+TOKEN = INFO.Get_Token()
 
 client = Bot(command_prefix=BOT_PREFIX)
+##################################################################################
+
+#Chooses a file at random from a folder
+def Choose_File(folder_name: str):
+    if(folder_name == None or folder_name == ""):
+        return None
+
+    try:
+        f =[]
+        for( dirpath, dirnames, filenames ) in os.walk(os.path.join(File_Path, folder_name)):
+            f.extend(filenames)
+            break;
+
+        filename = File_Path + '\\' + folder_name + '\\' + random.choice(f)
+        return filename
+    except FileExistsError or FileNotFoundError:
+        print("incorrect folder name")
+        return None
+    except IndexError:
+        print("Index Error, most likely folder wasn't found")
+        return None
+
+
+##################################################################################
 
 #Magic 8 Ball example
 @client.command(name='8ball',
@@ -47,22 +79,45 @@ async def eight_ball(message):
                 brief="WALUIGI TIME")
 async def wah(ctx):
     
-    f =[]
-    for( dirpath, dirnames, filenames ) in os.walk(os.path.join(File_Path, "waluigi")):
-        f.extend(filenames)
-        break;
+    #Gets all files in the Waluigi folder and then chooses one at random
 
-    print(f)
-
-    filename = File_Path + '\\waluigi\\' + random.choice(f)
-
-    #COMMENT: Figure out how to iterate through a list of files in a directory and pick one at random.
+    filename = Choose_File("waluigi")
+    if(filename == None):
+        filename = File_Path + '\\For_Broken\\dr evil sorry.jpg'
+        await ctx.send("```Sorry, it looks like I can't find a file. Please notify someone.```{0}".format(":frowning2:"))
 
     with open(filename, 'rb') as fp:
         await ctx.send(file=discord.File(fp))
         fp.close()
 
 
+#Dr Doofenshmirtz giphy
+@client.command(name='doof',
+                description="Shows Dr. Doofenshmirtz or Perry the Platypus from a URL from GIPIHY",
+                brief="Perry or Doofenshmirtz")
+async def doof(message):
+    doof_url = API_CALLS.Giphy_API_Call("doofenshmirtz phineas and ferb", "10")
+    if( doof_url == None):
+        doof_url = Choose_File("For_Broken")
+        with open(doof_url, 'rb') as fp:
+            await message.channel.send(file=discord.File(fp))
+    else:
+        await message.channel.send("``` BEHOLD, it is the giphy-inator\n ```URL: {0}".format(doof_url))
+
+#X-blade Kingdom Hearts
+@client.command(name='x',
+                aliases=('chi', 'kai', 'keyblade'))
+async def key_blade(message):
+    await message.channel.send("Not Yet Implemented!")
+
+#Rolf from Ed, Edd n' Eddy
+@client.command(name='rolf')
+async def rolf(message):
+    await message.channel.send("Not Yet Implemented!")
+
+
+
+'''
 @client.command(name='length')
 async def length(ctx):
     await ctx.send('Your message is {} characters long.'.format(len(ctx.message.content)))
@@ -76,6 +131,7 @@ async def echo(ctx, *, message: str):
 @client.command(name='echon')
 async def echo(ctx, message: str):
     await ctx.send(message)
+'''
 
 # DMs users
 @client.command(name='tdm')
@@ -104,6 +160,7 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
+    await client.change_presence(status=discord.Status.idle, activity=discord.Game("Awakening the Powers in me"))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
