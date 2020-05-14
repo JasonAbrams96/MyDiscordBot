@@ -25,6 +25,7 @@ class API_Calls:
                 d = data['data']
 
                 #Returns an address for the url
+                URL.close()
                 return random.choice(d)['url']
         
         except urllib.error.HTTPError:

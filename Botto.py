@@ -55,6 +55,11 @@ def Choose_File(folder_name: str):
         print("Index Error, most likely folder wasn't found")
         return None
 
+#sends a Im sorry messagem something went wrong
+async def Im_Sorry(message):
+    filename = File_Path + '\\For_Broken\\dr evil sorry.jpg'
+    await message.channel.send("`Sorry, it looks like I can't find a file. Please notify someone.`{0}".format(":frowning2:"))
+
 
 ##################################################################################
 
@@ -77,17 +82,16 @@ async def eight_ball(message):
 @client.command(name='wah',
                 description="Displays a picture of Waluigi.",
                 brief="WALUIGI TIME")
-async def wah(ctx):
+async def wah(message):
     
     #Gets all files in the Waluigi folder and then chooses one at random
 
     filename = Choose_File("waluigi")
     if(filename == None):
-        filename = File_Path + '\\For_Broken\\dr evil sorry.jpg'
-        await ctx.send("```Sorry, it looks like I can't find a file. Please notify someone.```{0}".format(":frowning2:"))
+        await Im_Sorry(message)
 
     with open(filename, 'rb') as fp:
-        await ctx.send(file=discord.File(fp))
+        await message.channel.send(file=discord.File(fp))
         fp.close()
 
 
@@ -96,25 +100,82 @@ async def wah(ctx):
                 description="Shows Dr. Doofenshmirtz or Perry the Platypus from a URL from GIPIHY",
                 brief="Perry or Doofenshmirtz")
 async def doof(message):
+    
+    #Code for making a GIPHY call for a doof
+    '''
     doof_url = API_CALLS.Giphy_API_Call("doofenshmirtz phineas and ferb", "10")
     if( doof_url == None):
         doof_url = Choose_File("For_Broken")
         with open(doof_url, 'rb') as fp:
             await message.channel.send(file=discord.File(fp))
     else:
-        await message.channel.send("``` BEHOLD, it is the giphy-inator\n ```URL: {0}".format(doof_url))
+        await message.channel.send("``` BEHOLD, it is the giphy-inator```\nURL: {0}".format(doof_url))
+    '''
+
+    #Code to get images form a folder
+    filename = Choose_File("doof")
+    if(filename == None):
+        await Im_Sorry(message)
+    else:
+        with open(filename, 'rb') as fp:
+            await message.channel.send("`BEHOLD {0.author.display_name}, I shall take over the entire Tri-State area with the File-Inator!`".format(message),
+                                         file=discord.File(filename))
+            fp.close()
 
 #X-blade Kingdom Hearts
 @client.command(name='x',
                 aliases=('chi', 'kai', 'keyblade'))
 async def key_blade(message):
-    await message.channel.send("Not Yet Implemented!")
+    filename = Choose_File("keyblade")
+
+    if(filename == None):
+        await Im_Sorry(message)
+        
+    else:
+        with open(filename, 'rb') as fp:
+            await message.channel.send("```{0.author.display_name}, this is the million dollar question. Answer Carefully```".format(message),
+                                         file=discord.File(filename))
+            fp.close()
 
 #Rolf from Ed, Edd n' Eddy
-@client.command(name='rolf')
+@client.command(name='rolf',
+                brief="Rolf's Wisdom",
+                description="Rolf from Ed, Edd n\' Eddy giving his wisdom from the old country.")
 async def rolf(message):
-    await message.channel.send("Not Yet Implemented!")
+    filename = Choose_File("rolf")
 
+    if(filename == None):
+        await Im_Sorry(message)
+
+    else:
+        with open(filename, 'rb') as fp:
+            await message.channel.send("```{0.author.display_name}, Rolf comes from The Old Country!```".format(message),
+                                         file=discord.File(filename))
+            fp.close()
+
+#Gives a gif from Gihpy based on what the user inputs
+@client.command(name='giphy',
+                brief="Shows a random GIF",
+                description="Shows a random gif from giphy based on context that you give it.\nFor example, !giphy sonic, should give you a random sonic gif.\nUse with caution, neither the bot or creator is at fault if something lewd or adult shows up.",
+                pass_context=True)
+async def giphy(message, *arg:str):
+    obj = " "
+    
+    if(len(arg) == 0):
+        await message.channel.send("Uh oh, looks like you didn't type anything after !giphy, type something after !giphy to get a giphy")
+        return
+    elif(len(arg) == 1):
+        obj = arg[0]
+        print(obj)
+    else:
+        obj = obj.join(arg)
+        print(obj)
+    
+    data = API_CALLS.Giphy_API_Call(obj, "10")
+    if data == None:
+       await Im_Sorry(message)
+    else:
+        await message.channel.send("Here art thou gif, {0.author.mention}\nURL: {1}".format(message, data))
 
 
 '''
@@ -136,7 +197,7 @@ async def echo(ctx, message: str):
 # DMs users
 @client.command(name='tdm')
 async def dm_me_test(message):
-    msg = "Hello"
+    msg = "Hello, this is a test message."
     user = client.get_user(message.author.id)
     await message.author.send(msg)
     await message.channel.send("I have sent you a DM, {0.author.mention}".format(message))
@@ -161,6 +222,8 @@ async def on_message(message):
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.idle, activity=discord.Game("Awakening the Powers in me"))
+
+    print('--------')
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
