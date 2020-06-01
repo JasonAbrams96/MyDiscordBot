@@ -3,9 +3,9 @@ token.txt
 giphy_key.txt
 
 #ignore any directories that have images
-waluigi/
 __pycache__/
+doof/
+For_Broken/
 keyblade/
 rolf/
-For_Broken/
-doof/
+waluigi/

@@ -2,7 +2,9 @@
 
 import urllib.request, json, urllib.error
 import random
+
 from my_info import Information
+
 class API_Calls:
 
     def __init__(self):
@@ -11,7 +13,7 @@ class API_Calls:
         self.INFO = Information()
         self.Giphy_Key = self.INFO.Get_Giphy_TOKEN()
 
-    def Giphy_API_Call(self, item: str, limit: str):
+    def Giphy_API_Call(self, item: str, limit: str, type :int):
 
         item = item.replace(" ", "+")
 
@@ -26,7 +28,17 @@ class API_Calls:
 
                 #Returns an address for the url
                 URL.close()
-                return random.choice(d)['url']
+
+                #Returns the raw url that Discord can use
+                if(type == 0):
+                    return random.choice(d)['url']
+                #returns the media link to use the gif with an embed
+                elif(type == 1):
+                    link = "https://media.giphy.com/media/{0}/giphy.gif".format(random.choice(d)['id'])
+                    return link
+                #else returns None because it needs a type
+                else:
+                    return None
         
         except urllib.error.HTTPError:
             print("Sorry, HTTP")
@@ -35,3 +47,6 @@ class API_Calls:
         except:
             print("Sorry, something else")
             return None
+
+    def Speedrun_API_Call(self):
+        pass

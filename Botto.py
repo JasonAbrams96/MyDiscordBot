@@ -12,6 +12,7 @@ import json
 import os
 import random
 import sys
+import discord.colour
 
 import discord
 from discord import Game
@@ -59,8 +60,37 @@ def Choose_File(folder_name: str):
 async def Im_Sorry(message):
     filename = File_Path + '\\For_Broken\\dr evil sorry.jpg'
     await message.channel.send("`Sorry, it looks like I can't find a file. Please notify someone.`{0}".format(":frowning2:"))
+    
+# method to get a embed return for the message
+def get_embed(descrip :str, tit :str, color :discord.Colour ):
 
+    #Null parameters are not okay but empty strings are fine
+    if(descrip == None or color == None or tit == None):
+        return None
+    
+    
+    e = discord.Embed(
+        title = tit,
+        description = descrip,
+        colour = color
+    )
 
+    return e
+
+#method to get a embed return with a picture
+async def get_pic_embed(descrip :str, tit :str, url :str, color :discord.Colour):
+    #Null parameters are not okay but empty strings are fine
+    if(descrip == None or color == None or tit == None):
+        return None
+
+    e = discord.Embed(
+        title = tit,
+        description = descrip,
+        colour = color
+    )
+ 
+    e.set_image(url=url)
+    return e
 ##################################################################################
 
 #Magic 8 Ball example
@@ -159,8 +189,9 @@ async def rolf(message):
                 description="Shows a random gif from giphy based on context that you give it.\nFor example, !giphy sonic, should give you a random sonic gif.\nUse with caution, neither the bot or creator is at fault if something lewd or adult shows up.",
                 pass_context=True)
 async def giphy(message, *arg:str):
-    obj = " "
+    obj = " " #this space is used for the .join to join things with spaces. This is used when + is used to replace the space for gipihy
     
+    #checks if there are aguments
     if(len(arg) == 0):
         await message.channel.send("Uh oh, looks like you didn't type anything after !giphy, type something after !giphy to get a giphy")
         return
@@ -171,14 +202,32 @@ async def giphy(message, *arg:str):
         obj = obj.join(arg)
         print(obj)
     
-    data = API_CALLS.Giphy_API_Call(obj, "10")
+    #Gets the 
+    data = API_CALLS.Giphy_API_Call(obj, "10", 1)
     if data == None:
        await Im_Sorry(message)
     else:
-        await message.channel.send("Here art thou gif, {0.author.mention}\nURL: {1}".format(message, data))
+        a = message.author.mention
+        print(data)
+        em = await get_pic_embed("Here art thou gif", "", data, discord.Colour.purple())
+        if(em == None):
+            await Im_Sorry(message)
+        else:
+            await message.channel.send(a, embed=em)
 
 
 '''
+@client.command(name="t_embed")
+async def t_embed(message):
+    c = discord.Colour.blue()
+    print(type(c))
+    em1 = discord.Embed(title="Blue", colour=c)
+    await message.channel.send(embed=em1)
+
+@client.command(name="test")
+async def test_method(message):
+    channel = message.channel.send("CHICKEN")
+
 @client.command(name='length')
 async def length(ctx):
     await ctx.send('Your message is {} characters long.'.format(len(ctx.message.content)))
